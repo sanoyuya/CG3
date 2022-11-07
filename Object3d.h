@@ -22,17 +22,15 @@ private: // エイリアス
 
 public: // サブクラス
 	// 頂点データ構造体
-	struct VertexPosNormalUv
+	struct VertexPos
 	{
 		XMFLOAT3 pos; // xyz座標
-		XMFLOAT3 normal; // 法線ベクトル
-		XMFLOAT2 uv;  // uv座標
 	};
 
 	// 定数バッファ用データ構造体
 	struct ConstBufferData
 	{
-		XMFLOAT4 color;	// 色 (RGBA)
+		//XMFLOAT4 color;	// 色 (RGBA)
 		XMMATRIX mat;	// ３Ｄ変換行列
 	};
 
@@ -42,12 +40,9 @@ private: // 定数
 	static const float prizmHeight;			// 柱の高さ
 	static const int planeCount = division * 2 + division * 2;		// 面の数
 	//static const int vertexCount = planeCount * 3;		// 頂点数
-	static const int vertexCount = 4;//頂点数
-	static const int indexCount = 3 * 2;//インデックス数
+	static const int vertexCount = 1;//頂点数
 	//頂点データ配列
-	static VertexPosNormalUv vertices[vertexCount];
-	//頂点インデックス配列
-	static unsigned short indices[indexCount];
+	static VertexPos vertices[vertexCount];
 
 public: // 静的メンバ関数
 	/// <summary>
@@ -126,8 +121,6 @@ private: // 静的メンバ変数
 	static ComPtr<ID3D12DescriptorHeap> descHeap;
 	// 頂点バッファ
 	static ComPtr<ID3D12Resource> vertBuff;
-	// インデックスバッファ
-	static ComPtr<ID3D12Resource> indexBuff;
 	// テクスチャバッファ
 	static ComPtr<ID3D12Resource> texbuff;
 	// シェーダリソースビューのハンドル(CPU)
@@ -146,8 +139,6 @@ private: // 静的メンバ変数
 	static XMFLOAT3 up;
 	// 頂点バッファビュー
 	static D3D12_VERTEX_BUFFER_VIEW vbView;
-	// インデックスバッファビュー
-	static D3D12_INDEX_BUFFER_VIEW ibView;
 	// 頂点データ配列
 	//static VertexPosNormalUv vertices[vertexCount];
 	// 頂点インデックス配列
