@@ -90,19 +90,19 @@ void ParticleManager::PostDraw()
 ParticleManager* ParticleManager::Create()
 {
 	// 3Dオブジェクトのインスタンスを生成
-	ParticleManager* object3d = new ParticleManager();
-	if (object3d == nullptr) {
+	ParticleManager* Billboard = new ParticleManager();
+	if (Billboard == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!object3d->Initialize()) {
-		delete object3d;
+	if (!Billboard->Initialize()) {
+		delete Billboard;
 		assert(0);
 		return nullptr;
 	}
 
-	return object3d;
+	return Billboard;
 }
 
 void ParticleManager::SetEye(XMFLOAT3 eye)
@@ -261,6 +261,9 @@ void ParticleManager::InitializeGraphicsPipeline()
 		{//スケール
 			"SCALE", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 		},
+		{//カラー
+			"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+		},
 	};
 
 	// グラフィックスパイプラインの流れを設定
@@ -350,7 +353,7 @@ void ParticleManager::LoadTexture()
 	ScratchImage scratchImg{};
 
 	// WICテクスチャのロード
-	result = LoadFromWICFile(L"Resources/tex1.png", WIC_FLAGS_NONE, &metadata, scratchImg);
+	result = LoadFromWICFile(L"Resources/centerCircle.png", WIC_FLAGS_NONE, &metadata, scratchImg);
 	assert(SUCCEEDED(result));
 
 	ScratchImage mipChain{};
@@ -557,7 +560,7 @@ void ParticleManager::UpdateViewMatrix()
 #pragma endregion
 }
 
-void ParticleManager::Add(int life, XMFLOAT3 position, XMFLOAT3 velocity, XMFLOAT3 accel, float start_scale, float end_scale)
+void ParticleManager::Add(int life, XMFLOAT3 position, XMFLOAT3 velocity, XMFLOAT3 accel, float start_scale, float end_scale, XMFLOAT4 color)
 {
 	//リストに要素を追加
 	particles.emplace_front();
@@ -568,6 +571,8 @@ void ParticleManager::Add(int life, XMFLOAT3 position, XMFLOAT3 velocity, XMFLOA
 	p.velocity = velocity;
 	p.accel = accel;
 	p.num_flame = life;
+	p.color = color;
+	p.color.w = 255.0f;
 }
 
 bool ParticleManager::Initialize()
@@ -627,6 +632,11 @@ void ParticleManager::Update()
 		//スケールの線形補間
 		it->scale = (it->e_scale - it->s_scale) * f;
 		it->scale += it->s_scale;
+
+		it->color.x -= 5.0f;
+		it->color.y -= 5.0f;
+		it->color.z -= 5.0f;
+		it->color.w -= 5.0f;
 	}
 
 	//定数バッファへデータ転送
@@ -643,6 +653,8 @@ void ParticleManager::Update()
 			vertMap->pos = it->position;
 			//スケール
 			vertMap->scale = it->scale;
+			//カラー
+			vertMap->color = it->color;
 			//次の頂点へ
 			vertMap++;
 		}

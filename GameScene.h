@@ -6,6 +6,16 @@
 #include "Sprite.h"
 #include "ParticleManager.h"
 #include "DebugText.h"
+#include "Billboard.h"
+#include "Object3d.h"
+#include"Emitter.h"
+#include<memory>
+
+enum class Scene
+{
+	Billboard,
+	Particle
+};
 
 /// <summary>
 /// ゲームシーン
@@ -60,6 +70,17 @@ private: // メンバ変数
 	/// ゲームシーン用
 	/// </summary>
 	Sprite* spriteBG = nullptr;
-	ParticleManager* particleMan = nullptr;
-};
+	std::unique_ptr<Emitter>emitter;
+	Billboard* billboard = nullptr;
+	Object3d* object3d = nullptr;
+	Scene scene = Scene::Billboard;
 
+	XMFLOAT3 billboardPosition = { 0,0,0 };
+	XMFLOAT3 object3dPosition = { 0,0,0 };
+
+	bool particleFlag = true;
+
+private:
+	void Reset();
+	void BillboardReset();
+};

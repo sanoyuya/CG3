@@ -10,7 +10,8 @@ GameScene::GameScene()
 GameScene::~GameScene()
 {
 	delete spriteBG;
-	delete particleMan;
+	delete billboard;
+	delete object3d;
 }
 
 void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
@@ -33,51 +34,98 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	// 背景スプライト生成
 	spriteBG = Sprite::Create(1, { 0.0f,0.0f });
 	// 3Dオブジェクト生成
-	particleMan = ParticleManager::Create();
-	particleMan->Update();
+	object3d = Object3d::Create();
+	object3d->Update();
+	// ビルボード生成
+	billboard = Billboard::Create();
+	billboard->Update();
+	// パーティクル生成
+	emitter = std::make_unique<Emitter>();
+	emitter->Initialize();
 
-	for (int i = 0; i < 100; i++)
-	{
-		//X,Y,Z全て[-5.0f,+5.0f]でランダムに分布
-		const float rnd_pos = 10.0f;
-		XMFLOAT3 pos{};
-		pos.x = (float)rand() / RAND_MAX * rnd_pos - rnd_pos / 2.0f;
-		pos.y = (float)rand() / RAND_MAX * rnd_pos - rnd_pos / 2.0f;
-		pos.z = (float)rand() / RAND_MAX * rnd_pos - rnd_pos / 2.0f;
-		//X,Y,Z全て[-0.05f,+0.05f]でランダムに分布
-		const float rnd_vel = 0.1f;
-		XMFLOAT3 vel{};
-		vel.x = (float)rand() / RAND_MAX * rnd_vel - rnd_vel / 2.0f;
-		vel.y = (float)rand() / RAND_MAX * rnd_vel - rnd_vel / 2.0f;
-		vel.z = (float)rand() / RAND_MAX * rnd_vel - rnd_vel / 2.0f;
-		//重力に見立ててYのみ[-0.001f,0]でランダムに分布
-		XMFLOAT3 acc{};
-		const float rnd_acc = 0.001f;
-		acc.y = -(float)rand() / RAND_MAX * rnd_acc;
-
-		//追加
-		particleMan->Add(60, pos, vel, acc, 1.0f, 0.0f);
-	}
+	billboardPosition.x = 20.0f;
+	object3dPosition.x = -20.0f;
 }
 
 void GameScene::Update()
 {
-	// オブジェクト移動
-	if (input->PushKey(DIK_UP) || input->PushKey(DIK_DOWN) || input->PushKey(DIK_RIGHT) || input->PushKey(DIK_LEFT))
+	switch (scene)
 	{
-		
-	}
+	case Scene::Billboard:
 
-	// カメラ移動
-	if (input->PushKey(DIK_W) || input->PushKey(DIK_S) || input->PushKey(DIK_D) || input->PushKey(DIK_A))
-	{
-		if (input->PushKey(DIK_W)) { ParticleManager::CameraMoveEyeVector({ 0.0f,+1.0f,0.0f }); }
-		else if (input->PushKey(DIK_S)) { ParticleManager::CameraMoveEyeVector({ 0.0f,-1.0f,0.0f }); }
-		if (input->PushKey(DIK_D)) { ParticleManager::CameraMoveEyeVector({ +1.0f,0.0f,0.0f }); }
-		else if (input->PushKey(DIK_A)) { ParticleManager::CameraMoveEyeVector({ -1.0f,0.0f,0.0f }); }
-	}
+		Reset();
 
-	particleMan->Update();
+		object3d->SetPosition(object3dPosition);
+
+		// オブジェクト移動
+		if (input->PushKey(DIK_UP) || input->PushKey(DIK_DOWN) || input->PushKey(DIK_RIGHT) || input->PushKey(DIK_LEFT))
+		{
+			// 移動後の座標を計算
+			if (input->PushKey(DIK_UP)) { billboardPosition.y += 1.0f; }
+			else if (input->PushKey(DIK_DOWN)) { billboardPosition.y -= 1.0f; }
+			if (input->PushKey(DIK_RIGHT)) { billboardPosition.x += 1.0f; }
+			else if (input->PushKey(DIK_LEFT)) { billboardPosition.x -= 1.0f; }
+		}
+
+		// 座標の変更を反映
+		billboard->SetPosition(billboardPosition);
+
+		// カメラ移動
+		if (input->PushKey(DIK_W) || input->PushKey(DIK_S) || input->PushKey(DIK_D) || input->PushKey(DIK_A))
+		{
+			if (input->PushKey(DIK_W)) { Object3d::CameraMoveEyeVector({ 0.0f,+1.0f,0.0f }); }
+			else if (input->PushKey(DIK_S)) { Object3d::CameraMoveEyeVector({ 0.0f,-1.0f,0.0f }); }
+			if (input->PushKey(DIK_D)) { Object3d::CameraMoveEyeVector({ +1.0f,0.0f,0.0f }); }
+			else if (input->PushKey(DIK_A)) { Object3d::CameraMoveEyeVector({ -1.0f,0.0f,0.0f }); }
+
+			if (input->PushKey(DIK_W)) { Billboard::CameraMoveEyeVector({ 0.0f,+1.0f,0.0f }); }
+			else if (input->PushKey(DIK_S)) { Billboard::CameraMoveEyeVector({ 0.0f,-1.0f,0.0f }); }
+			if (input->PushKey(DIK_D)) { Billboard::CameraMoveEyeVector({ +1.0f,0.0f,0.0f }); }
+			else if (input->PushKey(DIK_A)) { Billboard::CameraMoveEyeVector({ -1.0f,0.0f,0.0f }); }
+		}
+
+		billboard->Update();
+		object3d->Update();
+
+		break;
+
+	case Scene::Particle:
+
+		Reset();
+
+		// カメラ移動
+		if (input->PushKey(DIK_W) || input->PushKey(DIK_S) || input->PushKey(DIK_D) || input->PushKey(DIK_A))
+		{
+			if (input->PushKey(DIK_W)) { ParticleManager::CameraMoveEyeVector({ 0.0f,+1.0f,0.0f }); }
+			else if (input->PushKey(DIK_S)) { ParticleManager::CameraMoveEyeVector({ 0.0f,-1.0f,0.0f }); }
+			if (input->PushKey(DIK_D)) { ParticleManager::CameraMoveEyeVector({ +1.0f,0.0f,0.0f }); }
+			else if (input->PushKey(DIK_A)) { ParticleManager::CameraMoveEyeVector({ -1.0f,0.0f,0.0f }); }
+		}
+
+		if (input->TriggerKey(DIK_SPACE))
+		{
+			if (particleFlag == true)
+			{
+				particleFlag = false;
+			}
+			else
+			{
+				particleFlag = true;
+			}
+		}
+
+		if (particleFlag == true)
+		{
+			emitter->Create({-25,0,0});
+			emitter->Create({ 25,0,0 });
+			emitter->Create({ 0,-25,25 });
+			emitter->Create({ 0,25,-25 });
+		}
+
+		emitter->Update();
+
+		break;
+	}
 }
 
 void GameScene::Draw()
@@ -102,18 +150,47 @@ void GameScene::Draw()
 #pragma endregion
 
 #pragma region 3Dオブジェクト描画
-	// 3Dオブジェクト描画前処理
-	ParticleManager::PreDraw(cmdList);
 
-	// 3Dオブクジェクトの描画
-	particleMan->Draw();
+	switch ((Scene)scene)
+	{
+	case Scene::Billboard:
+
+		// 3Dオブジェクト描画前処理
+		Object3d::PreDraw(cmdList);
+		// 3Dオブクジェクトの描画
+		object3d->Draw();
+		// 3Dオブジェクト描画後処理
+		Object3d::PostDraw();
+
+		// 3Dオブジェクト描画前処理
+		Billboard::PreDraw(cmdList);
+		// ビルボードの描画
+		billboard->Draw();
+		// 3Dオブジェクト描画後処理
+		Billboard::PostDraw();
+
+		break;
+
+	case Scene::Particle:
+
+		// 3Dオブジェクト描画前処理
+		ParticleManager::PreDraw(cmdList);
+
+		// パーティクルの描画
+		emitter->Draw();
+
+		// 3Dオブジェクト描画後処理
+		ParticleManager::PostDraw();
+
+		break;
+	}
+
 
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-
-	// 3Dオブジェクト描画後処理
-	ParticleManager::PostDraw();
+	/// 
+	
 #pragma endregion
 
 #pragma region 前景スプライト描画
@@ -130,4 +207,27 @@ void GameScene::Draw()
 	// スプライト描画後処理
 	Sprite::PostDraw();
 #pragma endregion
+}
+
+void GameScene::Reset()
+{
+	if (input->TriggerKey(DIK_1))
+	{
+		BillboardReset();
+		scene = Scene::Billboard;
+	}
+	else if (input->TriggerKey(DIK_2))
+	{
+		particleFlag = true;
+		ParticleManager::SetEye({ 0,0,-50 });
+		scene = Scene::Particle;
+	}
+}
+
+void GameScene::BillboardReset()
+{
+	billboardPosition = { 20,0,0 };
+
+	Object3d::SetEye({ 0,0,-50 });
+	Billboard::SetEye({ 0,0,-50 });
 }

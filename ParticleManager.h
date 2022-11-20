@@ -28,6 +28,8 @@ struct Particle
 	float s_scale = 1.0f;
 	//最終値
 	float e_scale = 0.0f;
+	//カラー
+	DirectX::XMFLOAT4 color = {};
 };
 
 /// <summary>
@@ -50,6 +52,7 @@ public: // サブクラス
 	{
 		XMFLOAT3 pos; // xyz座標
 		float scale;//スケール
+		XMFLOAT4 color;//カラー
 	};
 
 	// 定数バッファ用データ構造体
@@ -228,7 +231,7 @@ public: // メンバ関数
 	/// <param name="position">初期座標</param>
 	/// <param name="velocity">速度</param>
 	/// <param name="accel">加速度</param>
-	void Add(int life, XMFLOAT3 position, XMFLOAT3 velocity, XMFLOAT3 accel, float start_scale, float end_scale);
+	void Add(int life, XMFLOAT3 position, XMFLOAT3 velocity, XMFLOAT3 accel, float start_scale, float end_scale,XMFLOAT4 color);
 
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
