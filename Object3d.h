@@ -1,232 +1,153 @@
-#pragma once
+ï»¿#pragma once
 
 #include <Windows.h>
 #include <wrl.h>
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <d3dx12.h>
+#include <string>
+#include "Model.h"
+#include "Camera.h"
 
 /// <summary>
-/// 3DƒIƒuƒWƒFƒNƒg
+/// 3Dã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 /// </summary>
 class Object3d
 {
-private: // ƒGƒCƒŠƒAƒX
-	// Microsoft::WRL::‚ğÈ—ª
+private: // ã‚¨ã‚¤ãƒªã‚¢ã‚¹
+	// Microsoft::WRL::ã‚’çœç•¥
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
-	// DirectX::‚ğÈ—ª
+	// DirectX::ã‚’çœç•¥
 	using XMFLOAT2 = DirectX::XMFLOAT2;
 	using XMFLOAT3 = DirectX::XMFLOAT3;
 	using XMFLOAT4 = DirectX::XMFLOAT4;
 	using XMMATRIX = DirectX::XMMATRIX;
 
-public: // ƒTƒuƒNƒ‰ƒX
-	// ’¸“_ƒf[ƒ^\‘¢‘Ì
-	struct VertexPosNormalUv
+public: // ã‚µãƒ–ã‚¯ãƒ©ã‚¹	
+
+	// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚»ãƒƒãƒˆ
+	struct PipelineSet
 	{
-		XMFLOAT3 pos; // xyzÀ•W
-		XMFLOAT3 normal; // –@üƒxƒNƒgƒ‹
-		XMFLOAT2 uv;  // uvÀ•W
+		// ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£
+		ComPtr<ID3D12RootSignature> rootsignature;
+		// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚¹ãƒ†ãƒ¼ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+		ComPtr<ID3D12PipelineState> pipelinestate;
 	};
 
-	// ’è”ƒoƒbƒtƒ@—pƒf[ƒ^\‘¢‘Ì
-	struct ConstBufferData
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡ç”¨ãƒ‡ãƒ¼ã‚¿æ§‹é€ ä½“B0
+	struct ConstBufferDataB0
 	{
-		XMFLOAT4 color;	// F (RGBA)
-		XMMATRIX mat;	// ‚R‚c•ÏŠ·s—ñ
+		XMMATRIX mat;	// ï¼“ï¼¤å¤‰æ›è¡Œåˆ—
 	};
 
-private: // ’è”
-	static const int division = 50;					// •ªŠ„”
-	static const float radius;				// ’ê–Ê‚Ì”¼Œa
-	static const float prizmHeight;			// ’Œ‚Ì‚‚³
-	static const int planeCount = division * 2 + division * 2;		// –Ê‚Ì”
-	//static const int vertexCount = planeCount * 3;		// ’¸“_”
-	static const int vertexCount = 4;//’¸“_”
-	static const int indexCount = 3 * 2;//ƒCƒ“ƒfƒbƒNƒX”
-	//’¸“_ƒf[ƒ^”z—ñ
-	static VertexPosNormalUv vertices[vertexCount];
-	//’¸“_ƒCƒ“ƒfƒbƒNƒX”z—ñ
-	static unsigned short indices[indexCount];
+private: // å®šæ•°
 
-public: // Ã“Iƒƒ“ƒoŠÖ”
+
+public: // é™çš„ãƒ¡ãƒ³ãƒé–¢æ•°
 	/// <summary>
-	/// Ã“I‰Šú‰»
+	/// é™çš„åˆæœŸåŒ–
 	/// </summary>
-	/// <param name="device">ƒfƒoƒCƒX</param>
-	/// <param name="window_width">‰æ–Ê•</param>
-	/// <param name="window_height">‰æ–Ê‚‚³</param>
-	static void StaticInitialize(ID3D12Device* device, int window_width, int window_height);
+	/// <param name="device">ãƒ‡ãƒã‚¤ã‚¹</param>
+	/// <param name="camera">ã‚«ãƒ¡ãƒ©</param>
+	static void StaticInitialize(ID3D12Device* device, Camera* camera = nullptr);
 
 	/// <summary>
-	/// •`‰æ‘Oˆ—
+	/// ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã®ç”Ÿæˆ
 	/// </summary>
-	/// <param name="cmdList">•`‰æƒRƒ}ƒ“ƒhƒŠƒXƒg</param>
-	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
+	static void CreateGraphicsPipeline();
 
 	/// <summary>
-	/// •`‰æŒãˆ—
+	/// ã‚«ãƒ¡ãƒ©ã®ã‚»ãƒƒãƒˆ
+	/// </summary>
+	/// <param name="camera">ã‚«ãƒ¡ãƒ©</param>
+	static void SetCamera(Camera* camera) { sCamera_ = camera; }
+
+	/// <summary>
+	/// æç”»å‰å‡¦ç†
+	/// </summary>
+	/// <param name="commandList">æç”»ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆ</param>
+	static void PreDraw(ID3D12GraphicsCommandList* commandList);
+
+	/// <summary>
+	/// æç”»å¾Œå‡¦ç†
 	/// </summary>
 	static void PostDraw();
 
 	/// <summary>
-	/// 3DƒIƒuƒWƒFƒNƒg¶¬
+	/// 3Dã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”Ÿæˆ
 	/// </summary>
 	/// <returns></returns>
 	static Object3d* Create();
 
-	/// <summary>
-	/// ‹“_À•W‚Ìæ“¾
-	/// </summary>
-	/// <returns>À•W</returns>
-	static const XMFLOAT3& GetEye() { return eye; }
-
-	/// <summary>
-	/// ‹“_À•W‚Ìİ’è
-	/// </summary>
-	/// <param name="position">À•W</param>
-	static void SetEye(XMFLOAT3 eye);
-
-	/// <summary>
-	/// ’‹“_À•W‚Ìæ“¾
-	/// </summary>
-	/// <returns>À•W</returns>
-	static const XMFLOAT3& GetTarget() { return target; }
-
-	/// <summary>
-	/// ’‹“_À•W‚Ìİ’è
-	/// </summary>
-	/// <param name="position">À•W</param>
-	static void SetTarget(XMFLOAT3 target);
-
-	/// <summary>
-	/// ƒxƒNƒgƒ‹‚É‚æ‚éˆÚ“®
-	/// </summary>
-	/// <param name="move">ˆÚ“®—Ê</param>
-	static void CameraMoveVector(XMFLOAT3 move);
-
-	/// <summary>
-	/// ƒxƒNƒgƒ‹‚É‚æ‚é‹“_ˆÚ“®
-	/// </summary>
-	/// <param name="move">ˆÚ“®—Ê</param>
-	static void CameraMoveEyeVector(XMFLOAT3 move);
-
-private: // Ã“Iƒƒ“ƒo•Ï”
-	// ƒfƒoƒCƒX
+private: // é™çš„ãƒ¡ãƒ³ãƒå¤‰æ•°
+	// ãƒ‡ãƒã‚¤ã‚¹
 	static ID3D12Device* device;
-	// ƒfƒXƒNƒŠƒvƒ^ƒTƒCƒY
-	static UINT descriptorHandleIncrementSize;
-	// ƒRƒ}ƒ“ƒhƒŠƒXƒg
-	static ID3D12GraphicsCommandList* cmdList;
-	// ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ
-	static ComPtr<ID3D12RootSignature> rootsignature;
-	// ƒpƒCƒvƒ‰ƒCƒ“ƒXƒe[ƒgƒIƒuƒWƒFƒNƒg
-	static ComPtr<ID3D12PipelineState> pipelinestate;
-	// ƒfƒXƒNƒŠƒvƒ^ƒq[ƒv
-	static ComPtr<ID3D12DescriptorHeap> descHeap;
-	// ’¸“_ƒoƒbƒtƒ@
-	static ComPtr<ID3D12Resource> vertBuff;
-	// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
-	static ComPtr<ID3D12Resource> indexBuff;
-	// ƒeƒNƒXƒ`ƒƒƒoƒbƒtƒ@
-	static ComPtr<ID3D12Resource> texbuff;
-	// ƒVƒF[ƒ_ƒŠƒ\[ƒXƒrƒ…[‚Ìƒnƒ“ƒhƒ‹(CPU)
-	static CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV;
-	// ƒVƒF[ƒ_ƒŠƒ\[ƒXƒrƒ…[‚Ìƒnƒ“ƒhƒ‹(CPU)
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV;
-	// ƒrƒ…[s—ñ
-	static XMMATRIX matView;
-	// Ë‰es—ñ
-	static XMMATRIX matProjection;
-	// ‹“_À•W
-	static XMFLOAT3 eye;
-	// ’‹“_À•W
-	static XMFLOAT3 target;
-	// ã•ûŒüƒxƒNƒgƒ‹
-	static XMFLOAT3 up;
-	// ’¸“_ƒoƒbƒtƒ@ƒrƒ…[
-	static D3D12_VERTEX_BUFFER_VIEW vbView;
-	// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@ƒrƒ…[
-	static D3D12_INDEX_BUFFER_VIEW ibView;
-	// ’¸“_ƒf[ƒ^”z—ñ
-	//static VertexPosNormalUv vertices[vertexCount];
-	// ’¸“_ƒCƒ“ƒfƒbƒNƒX”z—ñ
-	//static unsigned short indices[planeCount * 3];
-	//ƒrƒ‹ƒ{[ƒhs—ñ
-	static XMMATRIX matBillbord;
-	//Y²ü‚èƒrƒ‹ƒ{[ƒhs—ñ
-	static XMMATRIX matBillbordY;
+	// ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆ
+	static ID3D12GraphicsCommandList* sCommandList;
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚ã‚Šç”¨ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³
+	static PipelineSet pipelineSet;
+	// ã‚«ãƒ¡ãƒ©
+	static Camera* sCamera_;
 
-private:// Ã“Iƒƒ“ƒoŠÖ”
-	/// <summary>
-	/// ƒfƒXƒNƒŠƒvƒ^ƒq[ƒv‚Ì‰Šú‰»
-	/// </summary>
-	static void InitializeDescriptorHeap();
-
-	/// <summary>
-	/// ƒJƒƒ‰‰Šú‰»
-	/// </summary>
-	/// <param name="window_width">‰æ–Ê‰¡•</param>
-	/// <param name="window_height">‰æ–Êc•</param>
-	static void InitializeCamera(int window_width, int window_height);
-
-	/// <summary>
-	/// ƒOƒ‰ƒtƒBƒbƒNƒpƒCƒvƒ‰ƒCƒ“¶¬
-	/// </summary>
-	/// <returns>¬”Û</returns>
-	static void InitializeGraphicsPipeline();
-
-	/// <summary>
-	/// ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
-	/// </summary>
-	static void LoadTexture();
-
-	/// <summary>
-	/// ƒ‚ƒfƒ‹ì¬
-	/// </summary>
-	static void CreateModel();
-
-	/// <summary>
-	/// ƒrƒ…[s—ñ‚ğXV
-	/// </summary>
-	static void UpdateViewMatrix();
-
-public: // ƒƒ“ƒoŠÖ”
+public: // ãƒ¡ãƒ³ãƒé–¢æ•°
 	bool Initialize();
 	/// <summary>
-	/// –ˆƒtƒŒ[ƒ€ˆ—
+	/// æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‡¦ç†
 	/// </summary>
 	void Update();
 
 	/// <summary>
-	/// •`‰æ
+	/// æç”»
 	/// </summary>
 	void Draw();
 
 	/// <summary>
-	/// À•W‚Ìæ“¾
+	/// åº§æ¨™ã®å–å¾—
 	/// </summary>
-	/// <returns>À•W</returns>
-	const XMFLOAT3& GetPosition() const { return position; }
+	/// <returns>åº§æ¨™</returns>
+	const XMFLOAT3& GetPosition() { return position; }
 
 	/// <summary>
-	/// À•W‚Ìİ’è
+	/// åº§æ¨™ã®è¨­å®š
 	/// </summary>
-	/// <param name="position">À•W</param>
-	void SetPosition(const XMFLOAT3& position) { this->position = position; }
+	/// <param name="position">åº§æ¨™</param>
+	void SetPosition(XMFLOAT3 position) { this->position = position; }
 
-private: // ƒƒ“ƒo•Ï”
-	ComPtr<ID3D12Resource> constBuff; // ’è”ƒoƒbƒtƒ@
-	// F
+	void SetRotation(XMFLOAT3 rotation) { this->rotation = rotation; }
+
+	/// <summary>
+	/// ã‚¹ã‚±ãƒ¼ãƒ«ã®è¨­å®š
+	/// </summary>
+	/// <param name="position">ã‚¹ã‚±ãƒ¼ãƒ«</param>
+	void SetScale(XMFLOAT3 scale) { this->scale = scale; }
+
+	/// <summary>
+	/// ãƒ¢ãƒ‡ãƒ«ã®ã‚»ãƒƒãƒˆ
+	/// </summary>
+	/// <param name="model">ãƒ¢ãƒ‡ãƒ«</param>
+	void SetModel(Model* model) { this->model = model; }
+
+	void SetBillboard(bool isBillboard) { this->isBillboard = isBillboard; }
+
+private: // ãƒ¡ãƒ³ãƒå¤‰æ•°
+	ComPtr<ID3D12Resource> constBuffB0; // å®šæ•°ãƒãƒƒãƒ•ã‚¡
+	// è‰²
 	XMFLOAT4 color = { 1,1,1,1 };
-	// ƒ[ƒJƒ‹ƒXƒP[ƒ‹
+	// ãƒ­ãƒ¼ã‚«ãƒ«ã‚¹ã‚±ãƒ¼ãƒ«
 	XMFLOAT3 scale = { 1,1,1 };
-	// X,Y,Z²‰ñ‚è‚Ìƒ[ƒJƒ‹‰ñ“]Šp
+	// X,Y,Zè»¸å›ã‚Šã®ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢è§’
 	XMFLOAT3 rotation = { 0,0,0 };
-	// ƒ[ƒJƒ‹À•W
+	// ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™
 	XMFLOAT3 position = { 0,0,0 };
-	// ƒ[ƒJƒ‹ƒ[ƒ‹ƒh•ÏŠ·s—ñ
+	// ãƒ­ãƒ¼ã‚«ãƒ«ãƒ¯ãƒ¼ãƒ«ãƒ‰å¤‰æ›è¡Œåˆ—
 	XMMATRIX matWorld;
-	// eƒIƒuƒWƒFƒNƒg
+	// è¦ªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 	Object3d* parent = nullptr;
+	// ãƒ¢ãƒ‡ãƒ«
+	Model* model = nullptr;
+	// ãƒ“ãƒ«ãƒœãƒ¼ãƒ‰
+	bool isBillboard = false;
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡ã®ãƒãƒƒãƒ—
+	ConstBufferDataB0* constMap = nullptr;
 };
+

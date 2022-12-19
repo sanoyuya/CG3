@@ -1,5 +1,8 @@
 ﻿#include "GameScene.h"
+#include "Model.h"
 #include <cassert>
+#include <sstream>
+#include <iomanip>
 
 using namespace DirectX;
 
@@ -10,8 +13,13 @@ GameScene::GameScene()
 GameScene::~GameScene()
 {
 	delete spriteBG;
-	delete billboard;
-	delete object3d;
+	delete objSkydome;
+	delete objGround;
+	delete objFighter;
+	delete modelSkydome;
+	delete modelGround;
+	delete modelFighter;
+	delete camera;
 }
 
 void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
@@ -31,101 +39,53 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	// テクスチャ読み込み
 	Sprite::LoadTexture(1, L"Resources/background.png");
 
+    // カメラ生成
+	camera = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight, input);
+
+	// カメラ注視点をセット
+	camera->SetTarget({0, 1, 0});
+	camera->SetDistance(3.0f);
+
+    // 3Dオブジェクトにカメラをセット
+	Object3d::SetCamera(camera);
+
 	// 背景スプライト生成
 	spriteBG = Sprite::Create(1, { 0.0f,0.0f });
 	// 3Dオブジェクト生成
-	object3d = Object3d::Create();
-	object3d->Update();
-	// ビルボード生成
-	billboard = Billboard::Create();
-	billboard->Update();
-	// パーティクル生成
-	emitter = std::make_unique<Emitter>();
-	emitter->Initialize();
+	objSkydome = Object3d::Create();
+	objGround = Object3d::Create();
+	objFighter = Object3d::Create();
+	objSphere = Object3d::Create();
 
-	billboardPosition.x = 20.0f;
-	object3dPosition.x = -20.0f;
+	// テクスチャ2番に読み込み
+	Sprite::LoadTexture(2, L"Resources/texture.png");
+
+	modelSkydome = Model::CreateFromOBJ("skydome");
+	modelGround = Model::CreateFromOBJ("ground");
+	modelFighter = Model::CreateFromOBJ("chr_sword");
+	modelSphere = Model::CreateFromOBJ("sphere",true);
+
+	objSkydome->SetModel(modelSkydome);
+	objGround->SetModel(modelGround);
+	objFighter->SetModel(modelFighter);
+	objSphere->SetModel(modelSphere);
+
+	objFighter->SetPosition({ 1,0,0 });
+	objSphere->SetPosition({ -1,1,0 });
 }
 
 void GameScene::Update()
 {
-	switch (scene)
-	{
-	case Scene::Billboard:
+	camera->Update();
 
-		Reset();
+	objSkydome->Update();
+	objGround->Update();
+	objFighter->Update();
+	objSphere->Update();
 
-		object3d->SetPosition(object3dPosition);
-
-		// オブジェクト移動
-		if (input->PushKey(DIK_UP) || input->PushKey(DIK_DOWN) || input->PushKey(DIK_RIGHT) || input->PushKey(DIK_LEFT))
-		{
-			// 移動後の座標を計算
-			if (input->PushKey(DIK_UP)) { billboardPosition.y += 1.0f; }
-			else if (input->PushKey(DIK_DOWN)) { billboardPosition.y -= 1.0f; }
-			if (input->PushKey(DIK_RIGHT)) { billboardPosition.x += 1.0f; }
-			else if (input->PushKey(DIK_LEFT)) { billboardPosition.x -= 1.0f; }
-		}
-
-		// 座標の変更を反映
-		billboard->SetPosition(billboardPosition);
-
-		// カメラ移動
-		if (input->PushKey(DIK_W) || input->PushKey(DIK_S) || input->PushKey(DIK_D) || input->PushKey(DIK_A))
-		{
-			if (input->PushKey(DIK_W)) { Object3d::CameraMoveEyeVector({ 0.0f,+1.0f,0.0f }); }
-			else if (input->PushKey(DIK_S)) { Object3d::CameraMoveEyeVector({ 0.0f,-1.0f,0.0f }); }
-			if (input->PushKey(DIK_D)) { Object3d::CameraMoveEyeVector({ +1.0f,0.0f,0.0f }); }
-			else if (input->PushKey(DIK_A)) { Object3d::CameraMoveEyeVector({ -1.0f,0.0f,0.0f }); }
-
-			if (input->PushKey(DIK_W)) { Billboard::CameraMoveEyeVector({ 0.0f,+1.0f,0.0f }); }
-			else if (input->PushKey(DIK_S)) { Billboard::CameraMoveEyeVector({ 0.0f,-1.0f,0.0f }); }
-			if (input->PushKey(DIK_D)) { Billboard::CameraMoveEyeVector({ +1.0f,0.0f,0.0f }); }
-			else if (input->PushKey(DIK_A)) { Billboard::CameraMoveEyeVector({ -1.0f,0.0f,0.0f }); }
-		}
-
-		billboard->Update();
-		object3d->Update();
-
-		break;
-
-	case Scene::Particle:
-
-		Reset();
-
-		// カメラ移動
-		if (input->PushKey(DIK_W) || input->PushKey(DIK_S) || input->PushKey(DIK_D) || input->PushKey(DIK_A))
-		{
-			if (input->PushKey(DIK_W)) { ParticleManager::CameraMoveEyeVector({ 0.0f,+1.0f,0.0f }); }
-			else if (input->PushKey(DIK_S)) { ParticleManager::CameraMoveEyeVector({ 0.0f,-1.0f,0.0f }); }
-			if (input->PushKey(DIK_D)) { ParticleManager::CameraMoveEyeVector({ +1.0f,0.0f,0.0f }); }
-			else if (input->PushKey(DIK_A)) { ParticleManager::CameraMoveEyeVector({ -1.0f,0.0f,0.0f }); }
-		}
-
-		if (input->TriggerKey(DIK_SPACE))
-		{
-			if (particleFlag == true)
-			{
-				particleFlag = false;
-			}
-			else
-			{
-				particleFlag = true;
-			}
-		}
-
-		if (particleFlag == true)
-		{
-			emitter->Create({-25,0,0});
-			emitter->Create({ 25,0,0 });
-			emitter->Create({ 0,-25,25 });
-			emitter->Create({ 0,25,-25 });
-		}
-
-		emitter->Update();
-
-		break;
-	}
+	debugText.Print("AD: move camera LeftRight", 50, 50, 1.0f);
+	debugText.Print("WS: move camera UpDown", 50, 70, 1.0f);
+	debugText.Print("ARROW: move camera FrontBack", 50, 90, 1.0f);
 }
 
 void GameScene::Draw()
@@ -150,47 +110,21 @@ void GameScene::Draw()
 #pragma endregion
 
 #pragma region 3Dオブジェクト描画
+	// 3Dオブジェクト描画前処理
+	Object3d::PreDraw(cmdList);
 
-	switch ((Scene)scene)
-	{
-	case Scene::Billboard:
-
-		// 3Dオブジェクト描画前処理
-		Object3d::PreDraw(cmdList);
-		// 3Dオブクジェクトの描画
-		object3d->Draw();
-		// 3Dオブジェクト描画後処理
-		Object3d::PostDraw();
-
-		// 3Dオブジェクト描画前処理
-		Billboard::PreDraw(cmdList);
-		// ビルボードの描画
-		billboard->Draw();
-		// 3Dオブジェクト描画後処理
-		Billboard::PostDraw();
-
-		break;
-
-	case Scene::Particle:
-
-		// 3Dオブジェクト描画前処理
-		ParticleManager::PreDraw(cmdList);
-
-		// パーティクルの描画
-		emitter->Draw();
-
-		// 3Dオブジェクト描画後処理
-		ParticleManager::PostDraw();
-
-		break;
-	}
-
+	// 3Dオブクジェクトの描画
+	objSkydome->Draw();
+	objGround->Draw();
+	objFighter->Draw();
+	objSphere->Draw();
 
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	/// 
-	
+
+	// 3Dオブジェクト描画後処理
+	Object3d::PostDraw();
 #pragma endregion
 
 #pragma region 前景スプライト描画
@@ -201,33 +135,14 @@ void GameScene::Draw()
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 
+	//// 描画
+	//sprite1->Draw();
+	//sprite2->Draw();
+
 	// デバッグテキストの描画
 	debugText.DrawAll(cmdList);
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
 #pragma endregion
-}
-
-void GameScene::Reset()
-{
-	if (input->TriggerKey(DIK_1))
-	{
-		BillboardReset();
-		scene = Scene::Billboard;
-	}
-	else if (input->TriggerKey(DIK_2))
-	{
-		particleFlag = true;
-		ParticleManager::SetEye({ 0,0,-50 });
-		scene = Scene::Particle;
-	}
-}
-
-void GameScene::BillboardReset()
-{
-	billboardPosition = { 20,0,0 };
-
-	Object3d::SetEye({ 0,0,-50 });
-	Billboard::SetEye({ 0,0,-50 });
 }
