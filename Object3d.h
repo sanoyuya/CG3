@@ -167,7 +167,5 @@ private: // メンバ変数
 	Model* model = nullptr;
 	// ビルボード
 	bool isBillboard = false;
-	// 定数バッファのマップ
-	ConstBufferDataB0* constMap = nullptr;
 };
 

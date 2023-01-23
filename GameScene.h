@@ -58,6 +58,9 @@ class GameScene {
 	DebugCamera* camera = nullptr;
 	Light* light = nullptr;
 
+	//光線方向初期値
+	//static XMVECTOR lightDir;
+
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>

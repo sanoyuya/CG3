@@ -59,7 +59,7 @@ void Light::TransferConstBuffer()
 	}
 }
 
-void Light::SetLightDir(const XMVECTOR& light)
+void Light::SetLightDir(const XMVECTOR& lightdir)
 {
 	//³‹K‰»‚µ‚ÄƒZƒbƒg
 	this->lightdir = XMVector3Normalize(lightdir);

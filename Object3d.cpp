@@ -224,14 +224,12 @@ bool Object3d::Initialize() {
 	  IID_PPV_ARGS(&constBuffB0));
 	assert(SUCCEEDED(result));
 
-	// 定数バッファのマッピング
-	result = constBuffB0->Map(0, nullptr, (void**)&constMap);
-	assert(SUCCEEDED(result));
-
 	return true;
 }
 
 void Object3d::Update() {
+	HRESULT result;
+
 	assert(sCamera_);
 
 	XMMATRIX matScale, matRot, matTrans;
@@ -270,10 +268,15 @@ void Object3d::Update() {
 	}
 
 	// 定数バッファへデータ転送
+	ConstBufferDataB0* constMap = nullptr;
+	// 定数バッファのマッピング
+	result = constBuffB0->Map(0, nullptr, (void**)&constMap);
+	assert(SUCCEEDED(result));
 	//constMap->mat = matWorld * matViewProjection; // 行列の合成
 	constMap->viewproj = matViewProjection;
 	constMap->world = matWorld;
 	constMap->cameraPos = cameraPos;
+	constBuffB0->Unmap(0, nullptr);
 }
 
 void Object3d::Draw() {

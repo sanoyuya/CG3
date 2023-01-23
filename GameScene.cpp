@@ -94,15 +94,13 @@ void GameScene::Update()
 	objSphere->Update();
 
 	//オブジェクトの回転
-	{
-		XMFLOAT3 rot = objSphere->GetRotation();
-		rot.y += 1.0f;
-		objSphere->SetRotation(rot);
-		objFighter->SetRotation(rot);
-	}
+	XMFLOAT3 rot = objSphere->GetRotation();
+	rot.y += 1.0f;
+	objSphere->SetRotation(rot);
+	objFighter->SetRotation(rot);
 
 	//光線方向初期値
-	static XMVECTOR lightDir = { 0,1,5,0 };
+	static XMVECTOR lightDir = { 0.0f,1.0f,5.0f,0.0f };
 
 	if (input->PushKey(DIK_W)) { lightDir.m128_f32[1] += 1.0f; }
 	else if(input->PushKey(DIK_S)){ lightDir.m128_f32[1] -= 1.0f; }
