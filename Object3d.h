@@ -8,7 +8,7 @@
 #include <string>
 #include "Model.h"
 #include "Camera.h"
-#include"Light.h"
+#include"LightGroup.h"
 
 /// <summary>
 /// 3Dオブジェクト
@@ -87,8 +87,8 @@ public: // 静的メンバ関数
 	/// ライトのセット
 	/// </summary>
 	/// <param name="light">ライト</param>
-	static void SetLight(Light* light) {
-		Object3d::light = light;
+	static void SetLight(LightGroup* lightGroup) {
+		Object3d::lightGroup = lightGroup;
 	}
 
 private: // 静的メンバ変数
@@ -101,7 +101,7 @@ private: // 静的メンバ変数
 	// カメラ
 	static Camera* sCamera_;
 	//ライト
-	static Light* light;
+	static LightGroup* lightGroup;
 
 public: // メンバ関数
 	bool Initialize();

@@ -6,7 +6,7 @@
 /// <summary>
 /// ライト
 /// </summary>
-class Light
+class DirectionalLight
 {
 private://エイリアス
 	//Microsoft::WRL::を省略
@@ -24,6 +24,7 @@ public://サブクラス
 	{
 		XMVECTOR lightv;//ライトへの方向を表すベクトル
 		XMFLOAT3 lightcolor;//ライトの色
+		bool active;
 	};
 
 private://静的メンバ変数
@@ -42,7 +43,7 @@ public://静的メンバ関数
 	/// インスタンス生成
 	/// </summary>
 	/// <returns>インスタンス</returns>
-	static Light* Create();
+	static DirectionalLight* Create();
 
 private:
 	//定数バッファ
@@ -53,6 +54,8 @@ private:
 	XMFLOAT3 lightcolor = { 1,1,1 };
 	//ダーティフラグ
 	bool dirty = false;
+	//有効フラグ
+	bool active = false;
 
 public:
 
@@ -72,11 +75,15 @@ public:
 	/// <param name="light">ライト方向</param>
 	void SetLightDir(const XMVECTOR& light);
 
+	XMVECTOR GetLightDir()const;
+
 	/// <summary>
 	/// ライト色をセット
 	/// </summary>
 	/// <param name="lightcolor">ライト色</param>
 	void SetLightColor(const XMFLOAT3& lightcolor);
+
+	XMFLOAT3 GetLightColor()const;
 
 	/// <summary>
 	/// 更新
@@ -89,4 +96,16 @@ public:
 	/// <param name="cmdList"></param>
 	/// <param name="rootParameterIndex"></param>
 	void Draw(ID3D12GraphicsCommandList* cmdList, UINT rootParameterIndex);
+
+	/// <summary>
+	/// 有効フラグをセット
+	/// </summary>
+	/// <param name="active">有効フラグ</param>
+	inline void SetActive(bool active) { this->active = active; }
+
+	/// <summary>
+	/// 有効チェック
+	/// </summary>
+	/// <returns>有効フラグ</returns>
+	inline bool IsActive() { return active; }
 };

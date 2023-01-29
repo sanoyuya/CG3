@@ -7,7 +7,7 @@
 #include "Object3d.h"
 #include "Sprite.h"
 #include <DirectXMath.h>
-#include"Light.h"
+#include"LightGroup.h"
 
 /// <summary>
 /// ゲームシーン
@@ -56,7 +56,7 @@ class GameScene {
 	Input* input = nullptr;
 	DebugText debugText;
 	DebugCamera* camera = nullptr;
-	Light* light = nullptr;
+	LightGroup* lightGroup = nullptr;
 
 	//光線方向初期値
 	//static XMVECTOR lightDir;
@@ -75,4 +75,20 @@ class GameScene {
 	Object3d* objGround = nullptr;
 	Object3d* objFighter = nullptr;
 	Object3d* objSphere = nullptr;
+
+	float ambientColor0[3] = { 1,1,1 };
+	//光線方向初期値
+	float lightDir0[3] = { 0,0,1 };
+	float lightColor0[3] = { 1,0,0 };
+
+	float lightDir1[3] = { 0,1,0 };
+	float lightColor1[3] = { 0,1,0 };
+
+	float lightDir2[3] = { 1,0,0 };
+	float lightColor2[3] = { 0,0,1 };
+
+	//点光源
+	float pointLightPos[3] = { 0,0,0 };
+	float pointLightColor[3] = { 1,1,1 };
+	float pointLightAtten[3] = { 0.3f,0.1f,0.1f };
 };
