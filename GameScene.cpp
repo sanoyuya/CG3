@@ -78,12 +78,12 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	objFighter->SetModel(modelFighter);
 	objSphere->SetModel(modelSphere);
 
-	objFighter->SetPosition({ 1,0,0 });
+	objFighter->SetPosition(XMFLOAT3(fighterPos));
 	objSphere->SetPosition({ -1,1,0 });
 
-	lightGroup->SetDirLightActive(0, false);
-	lightGroup->SetDirLightActive(1, false);
-	lightGroup->SetDirLightActive(2, false);
+	lightGroup->SetDirLightActive(0, true);
+	lightGroup->SetDirLightActive(1, true);
+	lightGroup->SetDirLightActive(2, true);
 	lightGroup->SetPointLightActive(0, true);
 
 	pointLightPos[0] = 0.5f;
@@ -93,7 +93,9 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	lightGroup->SetPointLightActive(0, false);
 	lightGroup->SetPointLightActive(1, false);
 	lightGroup->SetPointLightActive(2, false);
-	lightGroup->SetSpotLightActive(0, true);
+	//lightGroup->SetSpotLightActive(0, true);
+
+	lightGroup->SetCircleShadowActive(0, true);
 }
 
 void GameScene::Update()
@@ -137,11 +139,18 @@ void GameScene::Update()
 		lightGroup->SetPointLightAtten(0, XMFLOAT3(pointLightAtten));*/
 
 		//ポイントライト
-		lightGroup->SetSpotLightDir(0, XMVECTOR({ spotLightDir[0],spotLightDir[1] ,spotLightDir[2] }));
+		/*lightGroup->SetSpotLightDir(0, XMVECTOR({ spotLightDir[0],spotLightDir[1] ,spotLightDir[2] }));
 		lightGroup->SetSpotLightPos(0, XMFLOAT3(spotLightPos));
 		lightGroup->SetSpotLightColor(0, XMFLOAT3(spotLightColor));
 		lightGroup->SetSpotLightAtten(0, XMFLOAT3(spotLightAtten));
-		lightGroup->SetSpotLightFactorAngle(0, XMFLOAT2(spotLightFactorAngle));
+		lightGroup->SetSpotLightFactorAngle(0, XMFLOAT2(spotLightFactorAngle));*/
+
+		lightGroup->SetCircleShadowDir(0, XMVECTOR({ circleShadowDir[0],circleShadowDir[1] ,circleShadowDir[2],0 }));
+		lightGroup->SetCircleShadowCasterPos(0, XMFLOAT3({ fighterPos[0],fighterPos[1] ,fighterPos[2] }));
+		lightGroup->SetCircleShadowAtten(0, XMFLOAT3(circleShadowAtten));
+		lightGroup->SetCircleShadowFactorAngle(0, XMFLOAT2(circleShadowFactorAngle));
+
+		objFighter->SetPosition(XMFLOAT3({ fighterPos[0], fighterPos[1], fighterPos[2] }));
 	}
 
 	std::ostringstream debugstr;
@@ -192,11 +201,17 @@ void GameScene::Draw()
 	ImGui::InputFloat3("pointLightAtten", pointLightAtten);*/
 
 	//スポットライト
-	ImGui::InputFloat3("spotLightDir", spotLightDir);
+	/*ImGui::InputFloat3("spotLightDir", spotLightDir);
 	ImGui::ColorEdit3("spotLightColor", spotLightColor, ImGuiColorEditFlags_Float);
 	ImGui::InputFloat3("spotLightPos", spotLightPos);
 	ImGui::InputFloat3("spotLightAtten", spotLightAtten);
-	ImGui::InputFloat2("spotLightFactorAngle", spotLightFactorAngle);
+	ImGui::InputFloat2("spotLightFactorAngle", spotLightFactorAngle);*/
+
+	//丸影
+	ImGui::InputFloat3("circleShadowDir", circleShadowDir);
+	ImGui::InputFloat("circleShadowAtten", circleShadowAtten, 8);
+	ImGui::InputFloat2("circleShadowFactorAngle", circleShadowFactorAngle);
+	ImGui::InputFloat3("fighterPos", fighterPos);
 
 	ImGui::End();
 

@@ -108,6 +108,36 @@ float4 main(VSOutput input) : SV_TARGET
             shaderColor.rgb += atten * (diffuse + specular) * spotLights[i].lightColor;
         }
     }
+    
+    //丸影
+    for (i = 0; i < CIRCLESHADOW_NUM;i++)
+    {
+        if(circleShadows[i].active)
+        {
+            //オブジェクト表面からキャスターへのベクトル
+            float3 casterv = circleShadows[i].casterPos - input.worldpos.xyz;
+            //投影方向での距離
+            float d = dot(casterv, circleShadows[i].dir);
+            //距離減衰係数
+            float atten = saturate(1.0f / (circleShadows[i].atten.x + circleShadows[i].atten.y * d + circleShadows[i].atten.z * d * d));
+            //距離がマイナスなら0にする
+            atten *= step(0, d);
+            //仮想ライトの座標
+            float3 lightPos = circleShadows[i].casterPos + circleShadows[i].dir * circleShadows[i].distanceCasterLight;
+            //オブジェクト表面からライトへのベクトル(単位ベクトル)
+            float3 lightv = normalize(lightPos - input.worldpos.xyz);
+            //角度減衰
+            float cos = dot(lightv, circleShadows[i].dir);
+            //減衰開始角度から、減衰終了角度にかけて減衰
+            //減衰開始角度の内側は1倍 減衰終了角度の外側は0倍の輝度
+            float angleAtten = smoothstep(circleShadows[i].factorAngleCos.y, circleShadows[i].factorAngleCos[i].x, cos);
+            //角度減衰を乗算
+            atten *= angleAtten;
+            
+            //全てを減算する
+            shaderColor.rgb -= atten;
+        }
+    }
 
     //シェーディングによる色で描画
     return shaderColor * texcolor;
