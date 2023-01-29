@@ -89,6 +89,11 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	pointLightPos[0] = 0.5f;
 	pointLightPos[1] = 1.0f;
 	pointLightPos[2] = 0.0f;
+
+	lightGroup->SetPointLightActive(0, false);
+	lightGroup->SetPointLightActive(1, false);
+	lightGroup->SetPointLightActive(2, false);
+	lightGroup->SetSpotLightActive(0, true);
 }
 
 void GameScene::Update()
@@ -126,9 +131,17 @@ void GameScene::Update()
 		lightGroup->SetDirLightDir(2, XMVECTOR({ lightDir2[0],lightDir2[1] ,lightDir2[2],0 }));
 		lightGroup->SetDirLightColor(2, XMFLOAT3(lightColor2));*/
 
-		lightGroup->SetPointLightPos(0, XMFLOAT3(pointLightPos));
+		//スポットライト
+		/*lightGroup->SetPointLightPos(0, XMFLOAT3(pointLightPos));
 		lightGroup->SetPointLightColor(0, XMFLOAT3(pointLightColor));
-		lightGroup->SetPointLightAtten(0, XMFLOAT3(pointLightAtten));
+		lightGroup->SetPointLightAtten(0, XMFLOAT3(pointLightAtten));*/
+
+		//ポイントライト
+		lightGroup->SetSpotLightDir(0, XMVECTOR({ spotLightDir[0],spotLightDir[1] ,spotLightDir[2] }));
+		lightGroup->SetSpotLightPos(0, XMFLOAT3(spotLightPos));
+		lightGroup->SetSpotLightColor(0, XMFLOAT3(spotLightColor));
+		lightGroup->SetSpotLightAtten(0, XMFLOAT3(spotLightAtten));
+		lightGroup->SetSpotLightFactorAngle(0, XMFLOAT2(spotLightFactorAngle));
 	}
 
 	std::ostringstream debugstr;
@@ -174,9 +187,16 @@ void GameScene::Draw()
 	ImGui::ColorEdit3("lightColor2", lightColor2, ImGuiColorEditFlags_Float);*/
 
 	//点光源
-	ImGui::ColorEdit3("pointLightColor", pointLightColor, ImGuiColorEditFlags_Float);
+	/*ImGui::ColorEdit3("pointLightColor", pointLightColor, ImGuiColorEditFlags_Float);
 	ImGui::InputFloat3("pointLightPos", pointLightPos);
-	ImGui::InputFloat3("pointLightAtten", pointLightAtten);
+	ImGui::InputFloat3("pointLightAtten", pointLightAtten);*/
+
+	//スポットライト
+	ImGui::InputFloat3("spotLightDir", spotLightDir);
+	ImGui::ColorEdit3("spotLightColor", spotLightColor, ImGuiColorEditFlags_Float);
+	ImGui::InputFloat3("spotLightPos", spotLightPos);
+	ImGui::InputFloat3("spotLightAtten", spotLightAtten);
+	ImGui::InputFloat2("spotLightFactorAngle", spotLightFactorAngle);
 
 	ImGui::End();
 

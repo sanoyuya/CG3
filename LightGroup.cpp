@@ -113,6 +113,26 @@ void LightGroup::TransferConstBuffer()
 			}
 		}
 
+		//スポットライト
+		for (int i = 0; i < SpotLightNum; i++)
+		{
+			//ライトが有効なら設定を転送
+			if (spotLights[i].IsActive())
+			{
+				constMap->spotLights[i].active = true;
+				constMap->spotLights[i].lightv = -spotLights[i].GetLightDir();
+				constMap->spotLights[i].lightPos = spotLights[i].GetLightPos();
+				constMap->spotLights[i].lightColor = spotLights[i].GetLightColor();
+				constMap->spotLights[i].lightAtten = spotLights[i].GetLightAtten();
+				constMap->spotLights[i].lightActorAngleCos = spotLights[i].GetLightFactorAngleCos();
+			}
+			//ライトが無効ならライトの色を0に
+			else
+			{
+				constMap->spotLights[i].active = false;
+			}
+		}
+
 		constBuff->Unmap(0, nullptr);
 	}
 }
@@ -171,6 +191,53 @@ void LightGroup::SetPointLightAtten(int index, const XMFLOAT3& lightAtten)
 	assert(0 <= index && index < PointLightNum);
 
 	pointLights[index].SetLightAtten(lightAtten);
+	dirty = true;
+}
+
+void LightGroup::SetSpotLightActive(int index, bool active)
+{
+	assert(0 <= index && index < SpotLightNum);
+
+	spotLights[index].SetActive(active);
+}
+
+void LightGroup::SetSpotLightDir(int index, const XMVECTOR& lightDir)
+{
+	assert(0 <= index && index < SpotLightNum);
+
+	spotLights[index].SetLightDir(lightDir);
+	dirty = true;
+}
+
+void LightGroup::SetSpotLightPos(int index, const XMFLOAT3& lightPos)
+{
+	assert(0 <= index && index < SpotLightNum);
+
+	spotLights[index].SetLightPos(lightPos);
+	dirty = true;
+}
+
+void LightGroup::SetSpotLightColor(int index, const XMFLOAT3& lightColor)
+{
+	assert(0 <= index && index < SpotLightNum);
+
+	spotLights[index].SetLightColor(lightColor);
+	dirty = true;
+}
+
+void LightGroup::SetSpotLightAtten(int index, const XMFLOAT3& lightAtten)
+{
+	assert(0 <= index && index < SpotLightNum);
+
+	spotLights[index].SetLightAtten(lightAtten);
+	dirty = true;
+}
+
+void LightGroup::SetSpotLightFactorAngle(int index, const XMFLOAT2& lightFactorAngle)
+{
+	assert(0 <= index && index < SpotLightNum);
+
+	spotLights[index].SetLightFactorAngle(lightFactorAngle);
 	dirty = true;
 }
 
