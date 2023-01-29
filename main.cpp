@@ -31,6 +31,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int)
 	
 	// 3Dオブジェクト静的初期化
 	Object3d::StaticInitialize(dxCommon->GetDevice());
+
+	LambertModel::StaticInitialize(dxCommon->GetDevice());
+
 	//ライト静的初期化
 	//DirectionalLight::StaticInitialize(dxCommon->GetDevice());
 

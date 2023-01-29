@@ -8,6 +8,7 @@
 #include "Sprite.h"
 #include <DirectXMath.h>
 #include"LightGroup.h"
+#include "LambertModel.h"
 
 /// <summary>
 /// ゲームシーン
@@ -58,6 +59,8 @@ class GameScene {
 	DebugCamera* camera = nullptr;
 	LightGroup* lightGroup = nullptr;
 
+	uint8_t scene = 0;
+
 	//光線方向初期値
 	//static XMVECTOR lightDir;
 
@@ -71,7 +74,11 @@ class GameScene {
 	Model* modelFighter = nullptr;
 	Model* modelSphere = nullptr;
 
-	Object3d* objSkydome = nullptr;
+	LambertModel* lambertSkydome = nullptr;
+	LambertModel* lambertSphere = nullptr;
+	LambertModel* lambertGround = nullptr;
+	LambertModel* lambertFighter = nullptr;
+
 	Object3d* objGround = nullptr;
 	Object3d* objFighter = nullptr;
 	Object3d* objSphere = nullptr;
