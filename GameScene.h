@@ -9,6 +9,7 @@
 #include <DirectXMath.h>
 #include"LightGroup.h"
 #include "LambertModel.h"
+#include"BaseModel.h"
 
 /// <summary>
 /// ゲームシーン
@@ -74,7 +75,7 @@ class GameScene {
 	Model* modelFighter = nullptr;
 	Model* modelSphere = nullptr;
 
-	LambertModel* lambertSkydome = nullptr;
+	BaseModel* baseSkydome = nullptr;
 	LambertModel* lambertSphere = nullptr;
 	LambertModel* lambertGround = nullptr;
 	LambertModel* lambertFighter = nullptr;

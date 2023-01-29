@@ -15,7 +15,7 @@ GameScene::GameScene()
 GameScene::~GameScene()
 {
 	delete spriteBG;
-	delete lambertSkydome;
+	delete baseSkydome;
 	delete objGround;
 	delete objFighter;
 	delete modelSkydome;
@@ -50,6 +50,7 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	camera->SetDistance(3.0f);
 
     // 3Dオブジェクトにカメラをセット
+	BaseModel::SetCamera(camera);
 	Object3d::SetCamera(camera);
 	LambertModel::SetCamera(camera);
 
@@ -61,7 +62,7 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	// 背景スプライト生成
 	spriteBG = Sprite::Create(1, { 0.0f,0.0f });
 	// 3Dオブジェクト生成
-	lambertSkydome = LambertModel::Create();
+	baseSkydome = BaseModel::Create();
 	lambertSphere = LambertModel::Create();
 	lambertGround = LambertModel::Create();
 	lambertFighter = LambertModel::Create();
@@ -77,7 +78,7 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	modelFighter = Model::CreateFromOBJ("chr_sword");
 	modelSphere = Model::CreateFromOBJ("sphere",true);
 
-	lambertSkydome->SetModel(modelSkydome);
+	baseSkydome->SetModel(modelSkydome);
 	lambertSphere->SetModel(modelSphere);
 	lambertGround->SetModel(modelGround);
 	lambertFighter->SetModel(modelFighter);
@@ -116,17 +117,25 @@ void GameScene::Update()
 	case 0:
 
 		camera->Update();
-		lambertSkydome->Update();
+		baseSkydome->Update();
 		lambertGround->Update();
 		lambertSphere->Update();
 		lambertFighter->Update();
+
+		//オブジェクトの回転
+		{
+			XMFLOAT3 rot = lambertSphere->GetRotation();
+			rot.y += 1.0f;
+			lambertSphere->SetRotation(rot);
+			lambertFighter->SetRotation(rot);
+		}
 
 		break;
 
 	case 1:
 
 		camera->Update();
-		lambertSkydome->Update();
+		baseSkydome->Update();
 
 		lightGroup->Update();
 
@@ -219,7 +228,7 @@ void GameScene::Draw()
 		// 背景スプライト描画前処理
 		Sprite::PreDraw(cmdList);
 		// 背景スプライト描画
-		spriteBG->Draw();
+		//spriteBG->Draw();
 
 		/// <summary>
 		/// ここに背景スプライトの描画処理を追加できる
@@ -231,15 +240,26 @@ void GameScene::Draw()
 		dxCommon->ClearDepthBuffer();
 #pragma endregion
 
+#pragma region Baseオブジェクト描画
+		// BaseModel描画前処理
+		BaseModel::PreDraw(cmdList);
+
+		// BaseModelの描画
+		baseSkydome->Draw();
+		/// <summary>
+		/// ここにBaseModelの描画処理を追加できる
+		/// </summary>
+
+		// BaseModel描画後処理
+		BaseModel::PostDraw();
+#pragma endregion
+
 #pragma region 3Dオブジェクト描画
 		// 3Dオブジェクト描画前処理
 		Object3d::PreDraw(cmdList);
 
 		// 3Dオブクジェクトの描画
-		/*objGround->Draw();
-		objFighter->Draw();
-		objSphere->Draw();*/
-
+		
 		/// <summary>
 		/// ここに3Dオブジェクトの描画処理を追加できる
 		/// </summary>
@@ -249,20 +269,19 @@ void GameScene::Draw()
 #pragma endregion
 
 #pragma region Lambertモデル描画
-		// 3Dオブジェクト描画前処理
+		// LambertModel描画前処理
 		LambertModel::PreDraw(cmdList);
 
-		// 3Dオブクジェクトの描画
-		/*lambertSkydome->Draw();
-		lambertGround->Draw();*/
+		// LambertModelの描画
+		lambertGround->Draw();
 		lambertSphere->Draw();
 		lambertFighter->Draw();
 
 		/// <summary>
-		/// ここに3Dオブジェクトの描画処理を追加できる
+		/// ここにLambertModelの描画処理を追加できる
 		/// </summary>
 
-		// 3Dオブジェクト描画後処理
+		// LambertModel描画後処理
 		LambertModel::PostDraw();
 #pragma endregion
 
@@ -338,12 +357,25 @@ void GameScene::Draw()
 		dxCommon->ClearDepthBuffer();
 #pragma endregion
 
+#pragma region Baseオブジェクト描画
+		// BaseModel描画前処理
+		BaseModel::PreDraw(cmdList);
+
+		// BaseModelの描画
+		baseSkydome->Draw();
+		/// <summary>
+		/// ここにBaseModelの描画処理を追加できる
+		/// </summary>
+
+		// BaseModel描画後処理
+		BaseModel::PostDraw();
+#pragma endregion
+
 #pragma region 3Dオブジェクト描画
 		// 3Dオブジェクト描画前処理
 		Object3d::PreDraw(cmdList);
 
 		// 3Dオブクジェクトの描画
-		lambertSkydome->Draw();
 		objGround->Draw();
 		objFighter->Draw();
 		objSphere->Draw();
@@ -354,6 +386,23 @@ void GameScene::Draw()
 
 		// 3Dオブジェクト描画後処理
 		Object3d::PostDraw();
+#pragma endregion
+
+#pragma region Lambertモデル描画
+		// LambertModel描画前処理
+		LambertModel::PreDraw(cmdList);
+
+		// LambertModelの描画
+		/*lambertGround->Draw();
+		lambertSphere->Draw();
+		lambertFighter->Draw();*/
+
+		/// <summary>
+		/// ここにLambertModelの描画処理を追加できる
+		/// </summary>
+
+		// LambertModel描画後処理
+		LambertModel::PostDraw();
 #pragma endregion
 
 #pragma region 前景スプライト描画

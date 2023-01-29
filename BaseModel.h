@@ -9,7 +9,7 @@
 #include "Model.h"
 #include "Camera.h"
 
-class LambertModel
+class BaseModel
 {
 private: // エイリアス
 	// Microsoft::WRL::を省略
@@ -74,7 +74,7 @@ public: // 静的メンバ関数
 	/// 3Dオブジェクト生成
 	/// </summary>
 	/// <returns></returns>
-	static LambertModel* Create();
+	static BaseModel* Create();
 
 private: // 静的メンバ変数
 	// デバイス
@@ -141,7 +141,7 @@ private: // メンバ変数
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	LambertModel* parent = nullptr;
+	BaseModel* parent = nullptr;
 	// モデル
 	Model* model = nullptr;
 	// ビルボード
