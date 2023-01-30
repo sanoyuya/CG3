@@ -15,7 +15,7 @@
 /// ゲームシーン
 /// </summary>
 class GameScene {
-  private: // エイリアス
+private: // エイリアス
 	// Microsoft::WRL::を省略
 	template<class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 	// DirectX::を省略
@@ -24,10 +24,10 @@ class GameScene {
 	using XMFLOAT4 = DirectX::XMFLOAT4;
 	using XMMATRIX = DirectX::XMMATRIX;
 
-  private: // 静的メンバ変数
+private: // 静的メンバ変数
 	static const int debugTextTexNumber = 0;
 
-  public: // メンバ関数
+public: // メンバ関数
 	/// <summary>
 	/// コンストクラタ
 	/// </summary>
@@ -53,7 +53,7 @@ class GameScene {
 	/// </summary>
 	void Draw();
 
-  private: // メンバ変数
+private: // メンバ変数
 	DirectXCommon* dxCommon = nullptr;
 	Input* input = nullptr;
 	DebugText debugText;
@@ -78,7 +78,7 @@ class GameScene {
 	BaseModel* baseSkydome = nullptr;
 	LambertModel* lambertSphere = nullptr;
 	LambertModel* lambertGround = nullptr;
-	LambertModel* lambertFighter = nullptr;
+	/*LambertModel* lambertFighter = nullptr;*/
 
 	Object3d* objGround = nullptr;
 	Object3d* objFighter = nullptr;
@@ -96,9 +96,13 @@ class GameScene {
 	float lightColor2[3] = { 0,0,1 };
 
 	//点光源
-	float pointLightPos[3] = { 0,0,0 };
-	float pointLightColor[3] = { 1,1,1 };
-	float pointLightAtten[3] = { 0.3f,0.1f,0.1f };
+	float pointLightPos1[3] = { -3,1,-2 };
+	float pointLightColor1[3] = { 1,1,1 };
+	float pointLightAtten1[3] = { 0.3f,0.1f,0.1f };
+
+	float pointLightPos2[3] = { 3,1,-2 };
+	float pointLightColor2[3] = { 1,1,1 };
+	float pointLightAtten2[3] = { 0.3f,0.1f,0.1f };
 
 	//スポットライト
 	float spotLightDir[3] = { 0,-1,0 };
@@ -112,5 +116,9 @@ class GameScene {
 	float circleShadowAtten[3] = { 0.5f,0.6f,0.0f };
 	float circleShadowFactorAngle[2] = { 0.0f,0.5f };
 
-	float fighterPos[3] = { 1,0.0f,0 };
+	float fighterPos[3] = { 2,1.0f,0 };
+
+private:
+
+	void Reset();
 };
